@@ -11,11 +11,7 @@ const BackCard: React.FC<BackCardProps> = ({ isFaceUp, onPress }) => {
   return (
     <TouchableOpacity onPress={onPress} style={styles.card}>
       <View style={[styles.cardContent, isFaceUp && styles.faceUp]}>
-        {isFaceUp ? (
-          <Text style={styles.cardText}>Carte affichée</Text> // Affichage du contenu de la carte quand elle est face visible
-        ) : (
-          <Text style={styles.cardText}>CARD</Text> // Affichage du dos de la carte
-        )}
+        <Text style={styles.cardText}>Pioche</Text> 
       </View>
     </TouchableOpacity>
   );

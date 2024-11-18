@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { generateDeck, shuffleDeck, Card } from '../../cardGame'; // Import du CardGame
 import BackCard from '../../backCard'; // Import du composant BackCard
+import BackToMenu from '../../backToMenu'; // Import du composant pour revenir au menu
 
 const BarbuGame: React.FC = () => {
   const [deck, setDeck] = useState<any[]>([]); // Deck de cartes (au format json)
@@ -29,9 +30,15 @@ const BarbuGame: React.FC = () => {
     }
   };
 
+  // Fonction pour gérer le retour au menu (par exemple, utiliser la navigation)
+  const handleBackToMenu = () => {
+    console.log("Retour au menu...");
+    // Ajoute ici la logique pour revenir au menu, par exemple avec react-navigation
+  };
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Jeu de Barbu</Text>
+      <Text style={styles.title}>Jeu du Barbu</Text>
       
       {/* Affichage de la carte de dos */}
       <BackCard onPress={handleCardClick} isFaceUp={isCardFaceUp} />
@@ -46,7 +53,8 @@ const BarbuGame: React.FC = () => {
       {/* Affichage du nombre de cartes restantes */}
       <Text style={styles.counter}>Cartes restantes : {remainingCards}</Text>
 
-      
+      {/* Affichage du bouton pour revenir au menu */}
+      {/* <BackToMenu onBackToMenu={handleBackToMenu}/> */}
     </View>
   );
 };

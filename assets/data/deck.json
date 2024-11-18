@@ -54,10 +54,7 @@
       { "suit": "Pique", "value": "10" },
       { "suit": "Pique", "value": "Valet" },
       { "suit": "Pique", "value": "Reine" },
-      { "suit": "Pique", "value": "Roi" },
-  
-      { "suit": "Joker", "value": "Rouge" },
-      { "suit": "Joker", "value": "Noir" }
+      { "suit": "Pique", "value": "Roi" }
     ]
   }
   
