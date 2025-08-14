@@ -1,10 +1,9 @@
-// components/backCard.tsx
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
 interface BackCardProps {
-  isFaceUp: boolean; // Indique si la carte est face visible ou non
-  onPress: () => void; // Fonction de gestion du clic sur la carte
+  isFaceUp: boolean; 
+  onPress: () => void;
 }
 
 const BackCard: React.FC<BackCardProps> = ({ isFaceUp, onPress }) => {
@@ -19,8 +18,8 @@ const BackCard: React.FC<BackCardProps> = ({ isFaceUp, onPress }) => {
 
 const styles = StyleSheet.create({
   card: {
-    width: 100,
-    height: 150,
+    width: 140,
+    height: 210,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
