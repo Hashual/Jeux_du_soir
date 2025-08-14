@@ -2,16 +2,28 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Modal, ScrollView } from 'react-native';
 import { generateDeck, shuffleDeck } from '../../components/cardGame';
 import BackCard from '../../components/backCard';
+import Card from '../../components/card';
 import { useRouter } from 'expo-router';
 import { ThemedButton } from '@/components/utilities/themedButton';
 
 const BarbuGame: React.FC = () => {
+  const [isShuffleConfirmVisible, setIsShuffleConfirmVisible] = useState(false);
+  // Mapping des noms français vers caractères
+  const suitMap: Record<string, '♥' | '♦' | '♣' | '♠'> = {
+    'Coeur': '♥',
+    'Carreau': '♦',
+    'Trèfles': '♣',
+    'Pique': '♠',
+    'Piques': '♠',
+    'Trèfle': '♣',
+  };
   const router = useRouter();
 
   const [deck, setDeck] = useState<any[]>([]);
   const [isCardFaceUp, setIsCardFaceUp] = useState<boolean>(false);
   const [remainingCards, setRemainingCards] = useState<number>(0);
   const [currentCard, setCurrentCard] = useState<string>('');
+const [currentCardObj, setCurrentCardObj] = useState<any | null>(null);
   const [isRulesVisible, setIsRulesVisible] = useState<boolean>(false); // État pour le modal
 
   useEffect(() => {
@@ -21,10 +33,21 @@ const BarbuGame: React.FC = () => {
     setRemainingCards(shuffledDeck.length);
   }, []);
 
+  const handleShuffle = () => {
+    const initialDeck = generateDeck();
+    const shuffledDeck = shuffleDeck(initialDeck);
+    setDeck(shuffledDeck);
+    setRemainingCards(shuffledDeck.length);
+    setCurrentCardObj(null);
+    setIsCardFaceUp(false);
+    setIsShuffleConfirmVisible(false);
+  };
+
   const handleCardClick = () => {
     if (deck.length > 0) {
       const nextCard = deck[0];
       setCurrentCard(`${nextCard.value} de ${nextCard.suit}`);
+      setCurrentCardObj(nextCard);
       setDeck(deck.slice(1));
       setRemainingCards(deck.length - 1);
       setIsCardFaceUp(true);
@@ -50,18 +73,42 @@ const BarbuGame: React.FC = () => {
         <ThemedButton title="Règles" onPress={() => setIsRulesVisible(true)} icon="book" />
       </View>
 
-      <View style={styles.gameContainer}>
-        <Text style={styles.title}>Jeu du Barbu</Text>
-        <BackCard onPress={handleCardClick} isFaceUp={isCardFaceUp} />
-
-        {isCardFaceUp && (
-          <View style={styles.card}>
-            <Text style={styles.cardText}>{currentCard}</Text>
-          </View>
-        )}
-
-        <Text style={styles.counter}>Cartes restantes : {remainingCards}</Text>
+      <View style={styles.gameContainerRow}>
+        <View style={styles.gameContainerCol}>
+          <Text style={styles.title}>Jeu du Barbu</Text>
+          <BackCard onPress={handleCardClick} isFaceUp={isCardFaceUp} />
+          {isCardFaceUp && currentCardObj && (
+            <Card
+              value={currentCardObj.value}
+              suit={suitMap[currentCardObj.suit] || '♠'}
+              isFaceUp={true}
+            />
+          )}
+          <Text style={styles.counter}>Cartes restantes : {remainingCards}</Text>
+        </View>
+        <View style={styles.shuffleContainer}>
+          <ThemedButton
+            title="Mélanger"
+            icon="shuffle"
+            color="#f39c12"
+            textColor="#fff"
+            text_position="center"
+            onPress={() => setIsShuffleConfirmVisible(true)}
+          />
+        </View>
       </View>
+      {/* Modal de confirmation pour le mélange */}
+      <Modal visible={isShuffleConfirmVisible} transparent animationType="fade">
+        <View style={styles.confirmModalBg}>
+          <View style={styles.confirmModalBox}>
+            <Text style={{fontSize: 18, fontWeight: 'bold', marginBottom: 12, textAlign: 'center'}}>Voulez-vous vraiment mélanger le jeu ?</Text>
+            <View style={{flexDirection: 'row', justifyContent: 'space-around'}}>
+              <ThemedButton title="Annuler" onPress={() => setIsShuffleConfirmVisible(false)} color="#888" textColor="#fff" text_position="center" />
+              <ThemedButton title="Oui" onPress={handleShuffle} color="#27ae60" textColor="#fff" text_position="center" />
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       {/* Modal pour les règles */}
       <Modal visible={isRulesVisible} animationType="slide">
@@ -84,10 +131,14 @@ const BarbuGame: React.FC = () => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f0f0f0' },
-  gameContainer: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  gameContainerRow: { flexDirection: 'row', flex: 1, alignItems: 'center', justifyContent: 'center' },
+  gameContainerCol: { alignItems: 'center', justifyContent: 'center' },
+  shuffleContainer: { justifyContent: 'center', alignItems: 'center', marginLeft: 24 },
+  confirmModalBg: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' },
+  confirmModalBox: { backgroundColor: '#fff', borderRadius: 12, padding: 24, minWidth: 260, elevation: 5 },
   title: { fontSize: 24, fontWeight: 'bold', marginBottom: 20 },
   counter: { fontSize: 18, marginTop: 20 },
-  card: { width: 100, height: 150, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderRadius: 5, backgroundColor: '#FFF', marginTop: 10 },
+  // card: { width: 100, height: 150, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderRadius: 5, backgroundColor: '#FFF', marginTop: 10 },
   cardText: { fontSize: 16, fontWeight: 'bold' },
   menuContainer: { flexDirection: 'row', justifyContent: 'space-around', paddingVertical: 10 },
   
