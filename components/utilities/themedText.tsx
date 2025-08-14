@@ -11,12 +11,14 @@ const textAlign = {
 export type ThemedTextProps = TextProps & {
   variant?: keyof typeof styles,
   align?: keyof typeof textAlign,
+  color?: string,
 };
 
 export function ThemedText({variant, align, style, ...rest}: ThemedTextProps) {
+  
 
   return (
-    <Text style={[styles[variant ?? "default"], {textAlign: align ?? "left"},  style]} {...rest}></Text>
+    <Text style={[styles[variant ?? "default"], {textAlign: align ?? "left"}, rest.color ? {color: rest.color} : {}, style]} {...rest}></Text>
   );
 }
 
