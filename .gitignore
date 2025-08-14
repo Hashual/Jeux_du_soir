@@ -9,6 +9,41 @@ dist/
 web-build/
 expo-env.d.ts
 
+# Build output
+build/
+websitefolio/build/
+
+# Android
+android/app/build/
+android/build/
+android/.gradle/
+.gradle/
+android/app/debug.keystore
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.swp
+
+# VS Code
+.vscode/
+
+# Coverage
+coverage/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# APK/AAB
+*.apk
+*.aab
+
+# Fonts générés automatiquement (si applicable)
+# assets/fonts/*.ttf
+
 # Native
 *.orig.*
 *.jks
