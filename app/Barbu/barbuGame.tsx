@@ -5,6 +5,8 @@ import BackCard from '../../components/backCard';
 import Card from '../../components/card';
 import { useRouter } from 'expo-router';
 import { ThemedButton } from '@/components/utilities/themedButton';
+import { getCardImage, initStorage } from '@/services/cardDeckStorage';
+import { CardValue, CardSuit } from '@/types/cardDeck.types';
 
 const BarbuGame: React.FC = () => {
   const [isShuffleConfirmVisible, setIsShuffleConfirmVisible] = useState(false);
@@ -25,8 +27,12 @@ const BarbuGame: React.FC = () => {
   const [currentCard, setCurrentCard] = useState<string>('');
 const [currentCardObj, setCurrentCardObj] = useState<any | null>(null);
   const [isRulesVisible, setIsRulesVisible] = useState<boolean>(false); // État pour le modal
+  const [currentCardImageUri, setCurrentCardImageUri] = useState<string | null>(null);
 
   useEffect(() => {
+    // Initialiser le stockage au démarrage
+    initStorage();
+    
     const initialDeck = generateDeck();
     const shuffledDeck = shuffleDeck(initialDeck);
     setDeck(shuffledDeck);
@@ -39,11 +45,12 @@ const [currentCardObj, setCurrentCardObj] = useState<any | null>(null);
     setDeck(shuffledDeck);
     setRemainingCards(shuffledDeck.length);
     setCurrentCardObj(null);
+    setCurrentCardImageUri(null);
     setIsCardFaceUp(false);
     setIsShuffleConfirmVisible(false);
   };
 
-  const handleCardClick = () => {
+  const handleCardClick = async () => {
     if (deck.length > 0) {
       const nextCard = deck[0];
       setCurrentCard(`${nextCard.value} de ${nextCard.suit}`);
@@ -51,6 +58,22 @@ const [currentCardObj, setCurrentCardObj] = useState<any | null>(null);
       setDeck(deck.slice(1));
       setRemainingCards(deck.length - 1);
       setIsCardFaceUp(true);
+      
+      // Récupérer l'image personnalisée pour cette carte
+      try {
+        // Convertir le nom français en CardSuit
+        let suitName = nextCard.suit;
+        // Normaliser les variations de nom
+        if (suitName === 'Piques') suitName = 'Pique';
+        if (suitName === 'Trèfle') suitName = 'Trèfles';
+        
+        const imageUri = await getCardImage(nextCard.value as CardValue, suitName as CardSuit);
+        console.log('Image trouvée pour', nextCard.value, suitName, ':', imageUri);
+        setCurrentCardImageUri(imageUri);
+      } catch (error) {
+        console.error('Erreur lors du chargement de l\'image:', error);
+        setCurrentCardImageUri(null);
+      }
     }
   };
 
@@ -69,8 +92,9 @@ const [currentCardObj, setCurrentCardObj] = useState<any | null>(null);
   return (
     <View style={styles.container}>
       <View style={styles.menuContainer}>
-        <ThemedButton title="Retour au menu" onPress={() => router.push('/')} icon="home" />
-        <ThemedButton title="Règles" onPress={() => setIsRulesVisible(true)} icon="book" />
+        <ThemedButton padH={20} padV={7} textStyle={{ fontSize: 16 }} title="Menu" onPress={() => router.push('/')} icon="home" />
+        <ThemedButton padH={20} padV={7} textStyle={{ fontSize: 16 }} title="Règles" onPress={() => setIsRulesVisible(true)} icon="book" />
+        <ThemedButton padH={20} padV={7} textStyle={{ fontSize: 16 }} title="Jeux de cartes" onPress={() => router.push('/Barbu/cardDeckManager')} icon="cards" />
       </View>
 
       <View style={styles.gameContainerRow}>
@@ -82,6 +106,7 @@ const [currentCardObj, setCurrentCardObj] = useState<any | null>(null);
               value={currentCardObj.value}
               suit={suitMap[currentCardObj.suit] || '♠'}
               isFaceUp={true}
+              customImageUri={currentCardImageUri}
             />
           )}
           <Text style={styles.counter}>Cartes restantes : {remainingCards}</Text>
@@ -103,8 +128,8 @@ const [currentCardObj, setCurrentCardObj] = useState<any | null>(null);
           <View style={styles.confirmModalBox}>
             <Text style={{fontSize: 18, fontWeight: 'bold', marginBottom: 12, textAlign: 'center'}}>Voulez-vous vraiment mélanger le jeu ?</Text>
             <View style={{flexDirection: 'row', justifyContent: 'space-around'}}>
-              <ThemedButton title="Annuler" onPress={() => setIsShuffleConfirmVisible(false)} color="#888" textColor="#fff" text_position="center" />
-              <ThemedButton title="Oui" onPress={handleShuffle} color="#27ae60" textColor="#fff" text_position="center" />
+              <ThemedButton title="Annuler" padH={20} onPress={() => setIsShuffleConfirmVisible(false)} color="#888" textColor="#fff" text_position="center" />
+              <ThemedButton title="Oui" padH={20} onPress={handleShuffle} color="#27ae60" textColor="#fff" text_position="center" />
             </View>
           </View>
         </View>
@@ -131,24 +156,23 @@ const [currentCardObj, setCurrentCardObj] = useState<any | null>(null);
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f0f0f0' },
-  gameContainerRow: { flexDirection: 'row', flex: 1, alignItems: 'center', justifyContent: 'center' },
+  gameContainerRow: { flexDirection: 'column', flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 10 },
   gameContainerCol: { alignItems: 'center', justifyContent: 'center' },
-  shuffleContainer: { justifyContent: 'center', alignItems: 'center', marginLeft: 24 },
-  confirmModalBg: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' },
-  confirmModalBox: { backgroundColor: '#fff', borderRadius: 12, padding: 24, minWidth: 260, elevation: 5 },
-  title: { fontSize: 24, fontWeight: 'bold', marginBottom: 20 },
-  counter: { fontSize: 18, marginTop: 20 },
-  // card: { width: 100, height: 150, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderRadius: 5, backgroundColor: '#FFF', marginTop: 10 },
+  shuffleContainer: { justifyContent: 'center', alignItems: 'center', marginTop: 15, marginBottom: 10 },
+  confirmModalBg: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 20 },
+  confirmModalBox: { backgroundColor: '#fff', borderRadius: 12, padding: 20, elevation: 5, width: '90%', maxWidth: 400 },
+  title: { fontSize: 22, fontWeight: 'bold', marginBottom: 15, textAlign: 'center' },
+  counter: { fontSize: 16, marginVertical: 12, textAlign: 'center', color: '#2c3e50' },
   cardText: { fontSize: 16, fontWeight: 'bold' },
-  menuContainer: { flexDirection: 'row', justifyContent: 'space-around', paddingVertical: 10 },
+  menuContainer: { flexDirection: 'row', justifyContent: 'space-around', paddingVertical: 12, paddingHorizontal: 10, flexWrap: 'wrap', gap: 8 },
   
   // Styles du modal
-  rulesContainer: { flex: 1, backgroundColor: '#1b1b1b', paddingTop: 50, paddingHorizontal: 16 },
-  rulesHeader: { fontSize: 28, fontWeight: 'bold', color: '#f1c40f', textAlign: 'center', marginBottom: 20 },
+  rulesContainer: { flex: 1, backgroundColor: '#1b1b1b', paddingTop: 40, paddingHorizontal: 16 },
+  rulesHeader: { fontSize: 24, fontWeight: 'bold', color: '#f1c40f', textAlign: 'center', marginBottom: 16 },
   scrollContent: { paddingBottom: 30 },
-  ruleCard: { backgroundColor: '#2c2c2c', padding: 15, borderRadius: 12, marginBottom: 12 },
-  ruleTitle: { fontSize: 20, fontWeight: 'bold', color: '#f39c12', marginBottom: 6 },
-  ruleDescription: { fontSize: 16, color: '#ecf0f1' }
+  ruleCard: { backgroundColor: '#2c2c2c', padding: 12, borderRadius: 10, marginBottom: 10 },
+  ruleTitle: { fontSize: 18, fontWeight: 'bold', color: '#f39c12', marginBottom: 5 },
+  ruleDescription: { fontSize: 14, color: '#ecf0f1', lineHeight: 20 }
 });
 
 export default BarbuGame;

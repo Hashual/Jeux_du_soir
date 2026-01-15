@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const suitIcons = {
@@ -16,9 +16,10 @@ export type CardProps = {
   isFaceUp?: boolean;
   onPress?: () => void;
   style?: any;
+  customImageUri?: string | null; // URI de l'image personnalisée
 };
 
-const Card: React.FC<CardProps> = ({ value, suit, isFaceUp = true, onPress, style }) => {
+const Card: React.FC<CardProps> = ({ value, suit, isFaceUp = true, onPress, style, customImageUri }) => {
   const icon = suitIcons[suit];
   const iconName = icon.name as keyof typeof MaterialCommunityIcons.glyphMap;
 
@@ -27,17 +28,25 @@ const Card: React.FC<CardProps> = ({ value, suit, isFaceUp = true, onPress, styl
       <View style={[styles.card, !isFaceUp && styles.cardBack]}>
         {isFaceUp ? (
           <>
-            <View style={styles.cornerTopLeft}>
-              <Text style={[styles.value, { color: icon.color }]}>{value}</Text>
-              <MaterialCommunityIcons name={iconName} size={18} color={icon.color} />
-            </View>
-            <View style={styles.centerIcon}>
-              <MaterialCommunityIcons name={iconName} size={40} color={icon.color} />
-            </View>
-            <View style={styles.cornerBottomRight}>
-              <Text style={[styles.value, { color: icon.color }]}>{value}</Text>
-              <MaterialCommunityIcons name={iconName} size={18} color={icon.color} />
-            </View>
+            {customImageUri ? (
+              // Afficher l'image personnalisée
+              <Image source={{ uri: customImageUri }} style={styles.customImage} resizeMode="cover" />
+            ) : (
+              // Afficher la carte standard avec icônes
+              <>
+                <View style={styles.cornerTopLeft}>
+                  <Text style={[styles.value, { color: icon.color }]}>{value}</Text>
+                  <MaterialCommunityIcons name={iconName} size={18} color={icon.color} />
+                </View>
+                <View style={styles.centerIcon}>
+                  <MaterialCommunityIcons name={iconName} size={40} color={icon.color} />
+                </View>
+                <View style={styles.cornerBottomRight}>
+                  <Text style={[styles.value, { color: icon.color }]}>{value}</Text>
+                  <MaterialCommunityIcons name={iconName} size={18} color={icon.color} />
+                </View>
+              </>
+            )}
           </>
         ) : (
           <View style={styles.backContent}>
@@ -51,19 +60,19 @@ const Card: React.FC<CardProps> = ({ value, suit, isFaceUp = true, onPress, styl
 
 const styles = StyleSheet.create({
   touchable: {
-    width: 140,
-    height: 210,
+    width: 110,
+    height: 165,
   },
   card: {
     flex: 1,
     backgroundColor: '#fff',
-    borderRadius: 10,
+    borderRadius: 8,
     borderWidth: 2,
     borderColor: '#bbb',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
-    shadowRadius: 4,
+    shadowRadius: 3,
     elevation: 3,
     overflow: 'hidden',
     position: 'relative',
@@ -81,15 +90,15 @@ const styles = StyleSheet.create({
   },
   cornerTopLeft: {
     position: 'absolute',
-    top: 6,
-    left: 8,
+    top: 4,
+    left: 6,
     flexDirection: 'row',
     alignItems: 'center',
   },
   cornerBottomRight: {
     position: 'absolute',
-    bottom: 6,
-    right: 8,
+    bottom: 4,
+    right: 6,
     flexDirection: 'row',
     alignItems: 'center',
   },
@@ -99,9 +108,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   value: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
     marginRight: 2,
+  },
+  customImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 6,
   },
 });
 

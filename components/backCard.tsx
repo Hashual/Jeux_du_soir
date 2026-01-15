@@ -18,13 +18,13 @@ const BackCard: React.FC<BackCardProps> = ({ isFaceUp, onPress }) => {
 
 const styles = StyleSheet.create({
   card: {
-    width: 140,
-    height: 210,
+    width: 110,
+    height: 165,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderRadius: 5,
-    margin: 10,
+    borderRadius: 8,
+    margin: 8,
   },
   cardContent: {
     width: '100%',
